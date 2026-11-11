@@ -29,7 +29,7 @@ jobs:
       - name: Extrair projeto
         run: |
           unzip APOSTA-CIRURGICA-projeto-inicial.zip
-          cd APOSTA-CIRURGICA
+          cd aposta-cirurgica
           gradle assembleDebug
 
       - name: Disponibilizar APK
