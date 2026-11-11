@@ -4,11 +4,13 @@ name: Gerar APK Android
 on:
   workflow_dispatch:
   push:
-    branches: [principal]
+    branches:
+      - principal
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Baixar projeto
         uses: actions/checkout@v4
@@ -18,6 +20,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
       - name: Extrair projeto
         run: |
