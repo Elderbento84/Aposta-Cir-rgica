@@ -26,14 +26,44 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Extrair projeto
+      - name: Extrair e compilar projeto
         run: |
-          unzip APOSTA-CIRURGICA-projeto-inicial.zip
-          cd aposta-cirurgica
+          ZIP_FILE=$(find . -maxdepth 1 -type f -iname '*.zip' | head -n 1)
+
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERRO: Nenhum arquivo ZIP encontrado."
+            exit 1
+          fi
+
+          mkdir -p extracted
+          unzip -q "$ZIP_FILE" -d extracted
+
+          PROJECT_DIR=$(find extracted -type f -name settings.gradle -printf '%h\n' | head -n 1)
+
+          if [ -z "$PROJECT_DIR" ]; then
+            PROJECT_DIR=$(find extracted -type f -name settings.gradle.kts -printf '%h\n' | head -n 1)
+          fi
+
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "ERRO: Projeto Android não encontrado."
+            exit 1
+          fi
+
+          cd "$PROJECT_DIR"
           gradle assembleDebug
+
+          APK=$(find app/build/outputs/apk/debug -name '*.apk' | head -n 1)
+
+          if [ -z "$APK" ]; then
+            echo "ERRO: APK não foi gerado."
+            exit 1
+          fi
+
+          cp "$APK" "$GITHUB_WORKSPACE/APOSTA-CIRURGICA-debug.apk"
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
           name: APOSTA-CIRURGICA-APK
-          path: aposta-cirurgica/app/build/outputs/apk/debug/app-debug.apk
+          path: APOSTA-CIRURGICA-debug.apk
+          
